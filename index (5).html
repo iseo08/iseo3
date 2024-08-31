@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>아이디어 공유</title>
+  <!-- Materialize CSS (디자인 라이브러리) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #ADFF2F;
+      padding: 20px;
+    }
+    .container {
+      margin-top: 50px;
+    }
+    .card {
+      padding: 20px;
+      margin: 15px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    .btn {
+      background-color: #007bff;
+      border-radius: 50px;
+    }
+    .btn:hover {
+      background-color: #0056b3;
+    }
+    /* 동그란 입력 필드 */
+    .input-field input[type="text"],
+    .input-field textarea {
+      border-radius: 25px;
+      border: 1px solid #ccc;
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+    /* 텍스트 입력 필드에서의 동그란 모서리 */
+    textarea.materialize-textarea {
+      border-radius: 25px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h4 class="center-align">아이디어 공유</h4>
+
+    <!-- 입력 폼 -->
+    <div class="row">
+      <div class="input-field col s12 m6">
+        <input id="title" type="text" class="validate">
+        <label for="title">제목</label>
+      </div>
+      <div class="input-field col s12 m6">
+        <textarea id="idea" class="materialize-textarea"></textarea>
+        <label for="idea">아이디어</label>
+      </div>
+    </div>
+    <div class="row center-align">
+      <button class="btn waves-effect waves-light" onclick="addIdea()">추가</button>
+    </div>
+
+    <!-- 아이디어 리스트 -->
+    <div id="idea-list" class="row">
+    </div>
+  </div>
+
+  <!-- Firebase 연결 및 함수 정의 -->
+  <script type="module">
+    // Firebase 초기화 코드
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+      // Firebase 설정 정보
+      apiKey: "AIzaSyBtFkJ9v4VxPDFD-M848jAIt1S3s3kmtBA",
+      authDomain: "iseo2-2cfee.firebaseapp.com",
+      projectId: "iseo2-2cfee",
+      storageBucket: "iseo2-2cfee.appspot.com",
+      messagingSenderId: "757142707010",
+      appId: "1:757142707010:web:1f33783ea1d61ad06286db",
+      measurementId: "G-SR4WCFGFEB"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // 페이지 로드 시 기존 아이디어 불러오기
+    window.onload = async function() {
+      const querySnapshot = await getDocs(collection(db, "ideas"));
+      querySnapshot.forEach((doc) => {
+        displayIdea(doc.data().title, doc.data().idea);
+      });
+    };
+
+    // 아이디어 추가 기능
+    window.addIdea = async function() {
+      const title = document.getElementById("title").value;
+      const idea = document.getElementById("idea").value;
+
+      if (title && idea) {
+        try {
+          await addDoc(collection(db, "ideas"), {
+            title: title,
+            idea: idea
+          });
+          displayIdea(title, idea);
+          document.getElementById("title").value = '';
+          document.getElementById("idea").value = '';
+        } catch (error) {
+          console.error("Error adding document: ", error);
+        }
+      } else {
+        alert("제목과 아이디어를 모두 입력해주세요.");
+      }
+    };
+
+    // 아이디어 화면에 표시하는 함수
+    function displayIdea(title, idea) {
+      const ideaList = document.getElementById("idea-list");
+      const ideaCard = document.createElement("div");
+      ideaCard.className = "col s12 m6 l4";
+      ideaCard.innerHTML = `
+        <div class="card">
+          <h5>${title}</h5>
+          <p>${idea}</p>
+        </div>`;
+      ideaList.appendChild(ideaCard);
+    }
+  </script>
+
+  <!-- Materialize JS (디자인 라이브러리) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</body>
+</html>
